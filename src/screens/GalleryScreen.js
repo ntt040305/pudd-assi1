@@ -7,7 +7,6 @@ import CustomButton from '../components/CustomButton';
 
 const { width } = Dimensions.get('window');
 
-// Guessing typical canvas height for viewBox scaling (thumbnail projection)
 const SVG_VIEWBOX = `0 0 ${width} 800`;
 
 export default function GalleryScreen() {
