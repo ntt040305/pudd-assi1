@@ -4,9 +4,9 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-import HomeScreen from './screens/HomeScreen';
-import DrawScreen from './screens/DrawScreen';
-import GalleryScreen from './screens/GalleryScreen';
+import HomeScreen from './src/screens/HomeScreen';
+import DrawScreen from './src/screens/DrawScreen';
+import GalleryScreen from './src/screens/GalleryScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();

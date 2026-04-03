@@ -33,13 +33,13 @@ export default function GalleryScreen() {
   );
 
   const clearGallery = async () => {
-    Alert.alert('Delete All', 'Are you sure you want to delete all art?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: async () => {
-          await AsyncStorage.removeItem('drawings');
-          setDrawings([]);
-      }},
-    ]);
+    try {
+      await AsyncStorage.setItem('drawings', JSON.stringify([]));
+      setDrawings([]);
+    } catch (error) {
+      console.error('Failed to clear gallery', error);
+      Alert.alert('Error', 'Failed to delete gallery.');
+    }
   };
 
   const renderItem = ({ item }) => (
@@ -83,20 +83,23 @@ export default function GalleryScreen() {
         </View>
       ) : (
         <FlatList
+          style={styles.list}
           data={drawings}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           contentContainerStyle={styles.listContainer}
         />
       )}
-      
+
       {drawings.length > 0 && (
-         <CustomButton 
-           title="Wipe Gallery" 
-           onPress={clearGallery} 
-           style={styles.wipeButton}
-           textStyle={{ color: 'white' }} 
-         />
+        <View style={styles.footer}>
+          <CustomButton
+            title="Delete Gallery"
+            onPress={clearGallery}
+            style={styles.wipeButton}
+            textStyle={styles.wipeButtonText}
+          />
+        </View>
       )}
     </View>
   );
@@ -107,10 +110,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0F172A',
   },
+  list: {
+    flex: 1,
+  },
   listContainer: {
     paddingTop: 20,
     paddingHorizontal: 20,
-    paddingBottom: 25,
+    paddingBottom: 16,
   },
   card: {
     backgroundColor: '#1E293B',
@@ -171,10 +177,17 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#64748B',
   },
+  footer: {
+    paddingHorizontal: 24,
+    paddingBottom: 20,
+    paddingTop: 4,
+  },
   wipeButton: {
     backgroundColor: '#EF4444',
-    marginHorizontal: 24,
-    marginBottom: 20,
     shadowColor: '#EF4444',
+  },
+  wipeButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '800',
   },
 });
