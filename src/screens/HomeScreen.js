@@ -1,29 +1,84 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, Text, StyleSheet, FlatList, Dimensions } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import Svg, { Path } from 'react-native-svg';
 import CustomButton from '../components/CustomButton';
 
+const { width } = Dimensions.get('window');
+const SVG_VIEWBOX = `0 0 ${width} 800`;
+
 export default function HomeScreen({ navigation }) {
+  const [drawings, setDrawings] = useState([]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const loadDrawings = async () => {
+        try {
+          const data = await AsyncStorage.getItem('drawings');
+          setDrawings(data ? JSON.parse(data).reverse() : []);
+        } catch (error) {
+          console.error('Failed to load drawings on Home', error);
+        }
+      };
+
+      loadDrawings();
+    }, [])
+  );
+
+  const renderItem = ({ item }) => (
+    <View style={styles.card}>
+      <View style={styles.thumbnailContainer}>
+        {item.paths && item.paths.length > 0 ? (
+          <Svg width="100%" height="100%" viewBox={SVG_VIEWBOX}>
+            {item.paths.map((p, index) => (
+              <Path
+                key={index}
+                d={p.path}
+                stroke={p.color}
+                strokeWidth={p.width * 2}
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            ))}
+          </Svg>
+        ) : (
+          <Text style={styles.thumbnailEmptyText}>Empty</Text>
+        )}
+      </View>
+      <View style={styles.detailsContainer}>
+        <Text style={styles.cardId}>Canvas #{item.id.slice(-5)}</Text>
+        <Text style={styles.cardDetail}>
+          Color: <Text style={styles.mainColorText}>{item.mainColor}</Text>
+        </Text>
+        <Text style={styles.cardDetail}>Thickness: {item.strokeWidth}</Text>
+        <Text style={styles.cardDetail}>Total Strokes: {item.strokeCount}</Text>
+      </View>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
-      <View style={styles.badgeContainer}>
-        <Text style={styles.badgeText}>APP DESIGN</Text>
-      </View>
-      <Text style={styles.title}>Welcome To</Text>
-      <Text style={styles.subtitle}>Studio</Text>
-      <Text style={styles.description}>
-        An immersive neo-canvas aesthetic to sketch, paint, and save your minimalistic artwork beautifully.
-      </Text>
-      
+      {drawings.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyTitle}>No gallery yet</Text>
+          <Text style={styles.emptySubText}>Start drawing to create your first gallery item.</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={drawings}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
+
       <View style={styles.buttonContainer}>
         <CustomButton
-          title="Create New Art"
+          title="Bắt đầu vẽ"
           onPress={() => navigation.navigate('Draw')}
-        />
-        <CustomButton
-          title="View Gallery"
-          onPress={() => navigation.navigate('Gallery')}
-          style={styles.galleryButton}
-          textStyle={styles.galleryText}
         />
       </View>
     </View>
@@ -33,59 +88,86 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
     backgroundColor: '#0F172A',
   },
-  badgeContainer: {
+  listContainer: {
+    paddingTop: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 120,
+  },
+  card: {
     backgroundColor: '#1E293B',
-    paddingVertical: 6,
-    paddingHorizontal: 16,
-    borderRadius: 999,
+    borderRadius: 24,
     marginBottom: 20,
+    overflow: 'hidden',
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
     borderColor: '#334155',
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 10,
+    elevation: 5,
   },
-  badgeText: {
-    color: '#38BDF8',
-    fontSize: 12,
-    fontWeight: 'bold',
-    letterSpacing: 1.5,
+  thumbnailContainer: {
+    width: 120,
+    height: 140,
+    backgroundColor: '#0F172A',
+    borderRightWidth: 1,
+    borderColor: '#334155',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  title: {
-    fontSize: 26,
-    fontWeight: '300',
-    color: '#94A3B8',
-    marginBottom: -5,
+  detailsContainer: {
+    flex: 1,
+    padding: 18,
+    justifyContent: 'center',
   },
-  subtitle: {
-    fontSize: 56,
-    fontWeight: '900',
+  cardId: {
+    fontSize: 18,
     color: '#F8FAFC',
-    marginBottom: 20,
-    letterSpacing: -1,
+    fontWeight: '900',
+    marginBottom: 10,
+    letterSpacing: 0.5,
   },
-  description: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 50,
+  cardDetail: {
+    fontSize: 14,
+    color: '#94A3B8',
+    marginBottom: 6,
+    fontWeight: '600',
+  },
+  mainColorText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  emptyTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#F8FAFC',
+    marginBottom: 6,
+  },
+  emptySubText: {
+    fontSize: 15,
     color: '#64748B',
-    lineHeight: 26,
-    paddingHorizontal: 10,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  thumbnailEmptyText: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#F8FAFC',
   },
   buttonContainer: {
-    width: '100%',
-    gap: 5,
-  },
-  galleryButton: {
-    backgroundColor: '#1E293B',
-    shadowColor: 'transparent',
-    elevation: 0,
-    borderWidth: 1,
-    borderColor: '#334155',
-  },
-  galleryText: {
-    color: '#94A3B8',
+    position: 'absolute',
+    left: 20,
+    right: 20,
+    bottom: 20,
   },
 });

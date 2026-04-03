@@ -1,1 +1,7 @@
-export { default } from './navigation/AppNavigator';
+import Navigator from './src/navigator/Navigator';
+
+export default function App() {
+	return <Navigator />;
+}
+
+

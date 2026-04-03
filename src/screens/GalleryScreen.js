@@ -65,7 +65,7 @@ export default function GalleryScreen() {
       <View style={styles.detailsContainer}>
         <Text style={styles.cardId}>Canvas #{item.id.slice(-5)}</Text>
         <Text style={styles.cardDetail}>
-          Color: <Text style={{ color: item.mainColor, fontWeight: 'bold' }}>{item.mainColor}</Text>
+          Color: <Text style={styles.mainColorText}>{item.mainColor}</Text>
         </Text>
         <Text style={styles.cardDetail}>Thickness: {item.strokeWidth}</Text>
         <Text style={styles.cardDetail}>Total Strokes: {item.strokeCount}</Text>
@@ -156,6 +156,10 @@ const styles = StyleSheet.create({
     color: '#94A3B8',
     marginBottom: 6,
     fontWeight: '600',
+  },
+  mainColorText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
   emptyContainer: {
     flex: 1,

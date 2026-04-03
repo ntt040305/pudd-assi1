@@ -70,7 +70,7 @@ export default function DrawScreen({ navigation }) {
              title="Save & Export"
              onPress={handleSave}
              style={styles.saveButton}
-             textStyle={{ color: '#0F172A', fontWeight: '900' }}
+             textStyle={styles.saveButtonText}
            />
         </View>
       </View>
@@ -103,5 +103,9 @@ const styles = StyleSheet.create({
   saveButton: {
     marginTop: 0,
     backgroundColor: '#38BDF8',
+  },
+  saveButtonText: {
+    color: '#0F172A',
+    fontWeight: '900',
   },
 });
